@@ -1,25 +1,36 @@
-import logo from './logo.svg';
-import './App.css';
+// src/App.js
+import React, { useState } from 'react';
+import OverlayFormComponent from './components/OverlayFormComponent';
+import VideoPlayerComponent from './components/VideoPlayerComponent';
 
-function App() {
+const App = () => {
+  const [livestreamUrl, setLivestreamUrl] = useState('http://192.168.43.221:5000'); // Update this line
+  const [overlays, setOverlays] = useState([]);
+
+  const handleSaveOverlay = async (newOverlay) => {
+    // Create overlay using Flask API
+    const response = await fetch('/api/overlays', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(newOverlay),
+    });
+
+    if (response.ok) {
+      const data = await response.json();
+      setOverlays([...overlays, data]);
+    } else {
+      console.error('Error creating overlay:', response.statusText);
+    }
+  };
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+    <div>
+      <OverlayFormComponent onSaveOverlay={handleSaveOverlay} />
+      <VideoPlayerComponent livestreamUrl={livestreamUrl} overlays={overlays} />
     </div>
   );
-}
+};
 
 export default App;
